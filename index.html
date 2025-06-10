@@ -1,21 +1,45 @@
 <!DOCTYPE html>
-<html lang=”en”>
+<html lang="en">
 
 <head>
-    <meta charset=”UTF-8">
-    <meta name=”viewport” content=”width=device-width, initial-scale=1">
-    <link rel=”stylesheet” type=”text/css” href=”//pagecdn.io/lib/swagger-ui/v3.31.1/swagger-ui.css”>
-    <title>Spacehero</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="SwaggerUI" />
+    <title>SwaggerUI</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
+</head>
 
 <body>
-    <div id=”openapi”>
-        <script src=”//pagecdn.io/lib/swagger-ui/v3.31.1/swagger-ui-bundle.js”></script>
-        <script>
-            window.onload = function () {
-                const ui = SwaggerUIBundle({
-                    url: "openapi_spec.yaml",
-                    dom_id: "#openapi"
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" crossorigin></script>
+    <script>
+        window.onload = () => {
+            // Add error handling for the fetch
+            fetch('./openapi_spec.yaml')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
                 })
-            }
-        </script>
+                .then(yaml => {
+                    window.ui = SwaggerUIBundle({
+                        spec: yaml,
+                        dom_id: '#swagger-ui',
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading OpenAPI spec:', error);
+                    document.getElementById('swagger-ui').innerHTML = `
+                        <div style="color: red; padding: 20px;">
+                            <h2>Error loading OpenAPI specification</h2>
+                            <p>${error.message}</p>
+                            <p>Please check the browser console for more details.</p>
+                        </div>
+                    `;
+                });
+        };
+    </script>
 </body>
+
+</html>
