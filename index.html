@@ -12,9 +12,9 @@
 <body>
     <div id="swagger-ui"></div>
     <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" crossorigin></script>
+    <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
     <script>
         window.onload = () => {
-            // Add error handling for the fetch
             fetch('./openapi_spec.yaml')
                 .then(response => {
                     if (!response.ok) {
@@ -23,9 +23,15 @@
                     return response.text();
                 })
                 .then(yaml => {
+                    const spec = jsyaml.load(yaml);
                     window.ui = SwaggerUIBundle({
-                        spec: yaml,
+                        spec: spec,
                         dom_id: '#swagger-ui',
+                        deepLinking: true,
+                        presets: [
+                            SwaggerUIBundle.presets.apis,
+                            SwaggerUIBundle.SwaggerUIStandalonePreset
+                        ],
                     });
                 })
                 .catch(error => {
