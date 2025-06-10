@@ -1,0 +1,1125 @@
+openapi: 3.0.0
+info:
+  title: Spacehero API
+  version: 1.0.0
+  description: API for SpaceHero Warehouse Management System
+
+servers:
+  - url: https://europe-west3-spacehero.cloudfunctions.net
+    description: Production server
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: "Invalid argument"
+    
+    Success:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        data:
+          type: object
+
+    PaletteLocationUpdate:
+      type: object
+      properties:
+        palletId:
+          type: string
+        newLocation:
+          type: array
+          items:
+            type: string
+        prepAreaId:
+          type: string
+
+    PaletteAdd:
+      type: object
+      properties:
+        palletId:
+          type: string
+        customerId:
+          type: string
+        newLocation:
+          type: array
+          items:
+            type: string
+
+    PaletteBarcodeAdd:
+      type: object
+      properties:
+        barcode:
+          type: string
+        customerId:
+          type: string
+        assignCustomer:
+          type: boolean
+        prepArea:
+          type: object
+        orderType:
+          type: string
+
+    PaletteBarcodeRemove:
+      type: object
+      properties:
+        barcode:
+          type: string
+
+    ItemsPaletteUpdate:
+      type: object
+      properties:
+        params:
+          type: array
+          items:
+            type: object
+            properties:
+              palletId:
+                type: string
+              itemIds:
+                type: array
+                items:
+                  type: string
+        customerId:
+          type: string
+
+    CustomerEdit:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        emails:
+          type: array
+          items:
+            type: string
+        placeCount:
+          type: number
+        paletteCount:
+          type: number
+        itemCount:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        billingContact:
+          type: object
+
+    CustomerMember:
+      type: object
+      properties:
+        customerId:
+          type: string
+        member:
+          type: object
+
+    CustomerMemberDelete:
+      type: object
+      properties:
+        customerId:
+          type: string
+        memberId:
+          type: string
+
+    CustomerDebt:
+      type: object
+      properties:
+        crn:
+          type: string
+
+    OrderSave:
+      type: object
+      properties:
+        order:
+          $ref: '#/components/schemas/Order'
+
+    OrderArchive:
+      type: object
+      properties:
+        orderId:
+          type: string
+
+    OrderStatus:
+      type: object
+      properties:
+        orderId:
+          type: string
+        status:
+          type: string
+
+    ItemSave:
+      type: object
+      properties:
+        item:
+          type: object
+
+    ItemBarcode:
+      type: object
+      properties:
+        barcode:
+          type: string
+
+    ItemBarcodeReassign:
+      type: object
+      properties:
+        oldBarcode:
+          type: string
+        newBarcode:
+          type: string
+
+    OrganizationEdit:
+      type: object
+      properties:
+        organization:
+          type: object
+
+    RequestProxy:
+      type: object
+      properties:
+        service:
+          type: string
+        data:
+          type: object
+
+    PlaceRemove:
+      type: object
+      properties:
+        placeId:
+          type: string
+
+    PlaceAdd:
+      type: object
+      properties:
+        buildingId:
+          type: string
+        floorId:
+          type: string
+        corridorId:
+          type: string
+        bayId:
+          type: string
+
+    PlaceBarcode:
+      type: object
+      properties:
+        barcode:
+          type: string
+
+    BayAdd:
+      type: object
+      properties:
+        bay:
+          type: object
+
+    BayRemove:
+      type: object
+      properties:
+        bayId:
+          type: string
+
+    ResourceCalendar:
+      type: object
+      properties:
+        resourceId:
+          type: string
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [pickup, returnTo]
+        orderId:
+          type: string
+        stepStatus:
+          type: string
+          nullable: true
+        customer:
+          $ref: '#/components/schemas/OrderCustomer'
+        itemIds:
+          type: object
+          additionalProperties:
+            type: boolean
+        service:
+          $ref: '#/components/schemas/OrderService'
+        manualStatus:
+          type: string
+          enum: [draft, submitted, pendingChanges, confirmed, scheduled, delayed, inProgress, completed, cancelled, archived]
+        status:
+          type: string
+          enum: [draft, submitted, pendingChanges, confirmed, scheduled, delayed, inProgress, completed, cancelled, archived]
+        quoteStatus:
+          type: string
+          enum: [draft, pendingReview, sent, accepted, rejected, expired]
+        quote:
+          type: number
+          nullable: true
+        insurance:
+          $ref: '#/components/schemas/Insurance'
+        notifications:
+          type: object
+          additionalProperties:
+            type: boolean
+        shipmentConfirmation:
+          $ref: '#/components/schemas/OrderShipmentConfirmation'
+          nullable: true
+        describeItems:
+          type: string
+          nullable: true
+        receipts:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderReceipt'
+          nullable: true
+        itemsSelectedForSteps:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: boolean
+        personPresent:
+          $ref: '#/components/schemas/OrderPersonPresent'
+          nullable: true
+        source:
+          type: string
+          enum: [customer, admin]
+        cancellationReason:
+          type: string
+          nullable: true
+
+    OrderCustomer:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+
+    OrderService:
+      type: object
+      properties:
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        country:
+          type: string
+
+    Insurance:
+      type: object
+      properties:
+        type:
+          type: string
+        value:
+          type: number
+
+    OrderShipmentConfirmation:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+
+    OrderReceipt:
+      type: object
+      properties:
+        id:
+          type: string
+        amount:
+          type: number
+        date:
+          type: string
+          format: date-time
+
+    OrderPersonPresent:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+
+paths:
+  /adminPaletteChangeLocation:
+    post:
+      summary: Changes the location of a palette
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaletteLocationUpdate'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminPaletteArchive:
+    post:
+      summary: Archives a palette
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                palletId:
+                  type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminPaletteAdd:
+    post:
+      summary: Adds a new palette
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaletteAdd'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /addPalletWithBarcode:
+    post:
+      summary: Adds a palette using a barcode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaletteBarcodeAdd'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /removePalletFromCustomer:
+    post:
+      summary: Removes a palette's association with a customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaletteBarcodeRemove'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /removeItemsFromPallet:
+    post:
+      summary: Removes specified items from a palette
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemsPaletteUpdate'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /assignItemsToPallets:
+    post:
+      summary: Assigns items to palettes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemsPaletteUpdate'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminCustomerEdit:
+    post:
+      summary: Edits customer information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerEdit'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminCustomerGenerateAuth:
+    post:
+      summary: Generates authentication credentials for a customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminCustomerResetPassword:
+    post:
+      summary: Resets a customer's password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminCustomerUpdateCrn:
+    post:
+      summary: Updates a customer's CRN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  type: string
+                crn:
+                  type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminCustomerAddEditMember:
+    post:
+      summary: Adds or edits a customer member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerMember'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminCustomerDeleteMember:
+    post:
+      summary: Deletes a customer member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerMemberDelete'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminGenerateStorageAgreement:
+    post:
+      summary: Generates a storage agreement for a customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /getCustomerDebt:
+    post:
+      summary: Retrieves customer debt information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerDebt'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminGenerateShipmentConfirmationReceipt:
+    post:
+      summary: Generates a shipment confirmation receipt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderId:
+                  type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminOrderSave:
+    post:
+      summary: Saves or updates an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderSave'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /adminOrderArchive:
+    post:
+      summary: Archives an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderArchive'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /updateOrderStatus:
+    post:
+      summary: Updates the status of an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderStatus'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /checkDelayedOrders:
+    post:
+      summary: Checks for delayed orders
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminItemSave:
+    post:
+      summary: Saves or updates an item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemSave'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /validateItemBarcodeForAssignment:
+    post:
+      summary: Validates an item barcode for assignment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemBarcode'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /validateBarcodeOfItem:
+    post:
+      summary: Validates a barcode of an item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemBarcode'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reassignBarcodeItem:
+    post:
+      summary: Reassigns a barcode to an item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemBarcodeReassign'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminOrganizationEdit:
+    post:
+      summary: Edits organization information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationEdit'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /requestProxyWrapper:
+    post:
+      summary: Proxies requests to external services
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestProxy'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminPlaceRemove:
+    post:
+      summary: Removes a place
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceRemove'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminPlaceAdd:
+    post:
+      summary: Adds a new place
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceAdd'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /getPlaceWithBarcode:
+    post:
+      summary: Retrieves a place using its barcode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceBarcode'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminBayAdd:
+    post:
+      summary: Adds a new bay
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BayAdd'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /adminBayRemove:
+    post:
+      summary: Removes a bay
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BayRemove'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /getCalendarByResource:
+    post:
+      summary: Retrieves calendar information for a resource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceCalendar'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' 
